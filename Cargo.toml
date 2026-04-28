@@ -1,6 +1,8 @@
-[package]
-name = "tauri-test"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
+[workspace]
+members = [
+    "crates/tauri-test",
+    "crates/tauri-test-macros",
+    "examples/tauri-app/src-tauri",
+]
+exclude = []
+resolver = "2"

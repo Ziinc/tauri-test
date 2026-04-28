@@ -1,7 +1,28 @@
-# Tauri + React + Typescript
+# TauriTest Example
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+This example shows the README-first `tauri-test` flow:
 
-## Recommended IDE Setup
+- plain `#[tauri::command]` functions are exposed to tests automatically
+- Rust command logic runs through a real N-API bridge
+- Vitest + JSDOM drive the React UI
+- `@tauri-apps/api/core` is mocked to call the generated addon in `src-tauri/target`
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Run
+
+From this directory:
+
+```bash
+npm test
+```
+
+That command will:
+
+1. compile the `src-tauri` crate
+2. generate a loader in `src-tauri/target`
+3. run the Vitest suite
+
+## Relevant files
+
+- `src-tauri/src/lib.rs`: plain Tauri commands plus `#[tauri_test::setup]`
+- `tests/setup.ts`: addon loading and `invoke` mock wiring
+- `tests/app.test.tsx`: UI-driven and direct-command integration tests

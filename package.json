@@ -1,15 +1,33 @@
 {
   "name": "tauri-test",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "napi-rs bridge for testing Tauri apps with vitest/jest",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "pretest": "npm run build",
+    "test": "node --test tests/*.test.js"
+  },
+  "peerDependencies": {
+    "vitest": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vitest": { "optional": true }
   },
   "devDependencies": {
-    "typescript": "~6.0.2",
-    "vite": "^8.0.9"
+    "@types/node": "^24.10.1",
+    "tsup": "^8.0.0",
+    "typescript": "~6.0.2"
   }
 }

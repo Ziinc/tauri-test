@@ -1,0 +1,10 @@
+{
+  "name": "tauri-app-napi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "tauri-app.node",
+  "napi": {
+    "binaryName": "tauri-app"
+  }
+}
