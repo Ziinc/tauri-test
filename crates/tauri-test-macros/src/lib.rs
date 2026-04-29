@@ -85,17 +85,23 @@ pub fn setup(attr: TokenStream, item: TokenStream) -> TokenStream {
     let struct_item = parse_macro_input!(item as ItemStruct);
 
     if !matches!(struct_item.fields, syn::Fields::Unit) {
-        return syn::Error::new_spanned(&struct_item, "#[tauri_test::setup] only supports unit structs")
-            .to_compile_error()
-            .into();
+        return syn::Error::new_spanned(
+            &struct_item,
+            "#[tauri_test::setup] only supports unit structs",
+        )
+        .to_compile_error()
+        .into();
     }
 
     let manifest_dir = match std::env::var("CARGO_MANIFEST_DIR") {
         Ok(value) => PathBuf::from(value),
         Err(err) => {
-            return syn::Error::new_spanned(&struct_item, format!("missing CARGO_MANIFEST_DIR: {err}"))
-                .to_compile_error()
-                .into()
+            return syn::Error::new_spanned(
+                &struct_item,
+                format!("missing CARGO_MANIFEST_DIR: {err}"),
+            )
+            .to_compile_error()
+            .into()
         }
     };
 
@@ -109,9 +115,12 @@ pub fn setup(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     if let Err(err) = emit_target_loader(&manifest_dir) {
-        return syn::Error::new_spanned(&struct_item, format!("failed to write target loader: {err}"))
-            .to_compile_error()
-            .into();
+        return syn::Error::new_spanned(
+            &struct_item,
+            format!("failed to write target loader: {err}"),
+        )
+        .to_compile_error()
+        .into();
     }
 
     let dispatch_impl = match generate_setup_impl(&struct_item, &scan, args.init.as_ref()) {
@@ -219,7 +228,10 @@ impl Parse for SetupArgs {
 
         let key: Ident = input.parse()?;
         if key != "init" {
-            return Err(syn::Error::new(key.span(), "expected `init = some_function`"));
+            return Err(syn::Error::new(
+                key.span(),
+                "expected `init = some_function`",
+            ));
         }
         input.parse::<Token![=]>()?;
         let init = input.parse::<syn::Path>()?;
@@ -282,7 +294,9 @@ fn build_command_arms(commands: &[CommandSpec]) -> Result<Vec<proc_macro2::Token
     for command in commands {
         let name = command.function.sig.ident.to_string();
         if !seen.insert(name.clone()) {
-            return Err(format!("duplicate #[tauri::command] function name found: {name}"));
+            return Err(format!(
+                "duplicate #[tauri::command] function name found: {name}"
+            ));
         }
 
         let command_name = LitStr::new(&name, command.function.sig.ident.span());
@@ -320,7 +334,12 @@ fn build_command_arms(commands: &[CommandSpec]) -> Result<Vec<proc_macro2::Token
             call_args.push(quote! { #param });
         }
 
-        let result = generate_invoke_result(&fn_path, &call_args, &command.function.sig.output, command.function.sig.asyncness.is_some());
+        let result = generate_invoke_result(
+            &fn_path,
+            &call_args,
+            &command.function.sig.output,
+            command.function.sig.asyncness.is_some(),
+        );
 
         arms.push(quote! {
             #command_name => {
@@ -498,8 +517,14 @@ fn resolve_init_spec(
 
     match matches.len() {
         1 => Ok(matches.into_iter().next()),
-        0 => Err(format!("could not resolve init function `{}`", quote! { #init_path })),
-        _ => Err(format!("init function `{}` is ambiguous", quote! { #init_path })),
+        0 => Err(format!(
+            "could not resolve init function `{}`",
+            quote! { #init_path }
+        )),
+        _ => Err(format!(
+            "init function `{}` is ambiguous",
+            quote! { #init_path }
+        )),
     }
 }
 
@@ -512,15 +537,28 @@ fn scan_crate(manifest_dir: &Path) -> Result<ScanResult, String> {
     };
 
     if !root_file.exists() {
-        return Err(format!("no src/lib.rs or src/main.rs found in {}", manifest_dir.display()));
+        return Err(format!(
+            "no src/lib.rs or src/main.rs found in {}",
+            manifest_dir.display()
+        ));
     }
 
     let mut commands = Vec::new();
     let mut functions = Vec::new();
     let mut visited = HashSet::new();
-    scan_module_file(&root_file, &src_dir, &mut Vec::new(), &mut visited, &mut commands, &mut functions)?;
+    scan_module_file(
+        &root_file,
+        &src_dir,
+        &mut Vec::new(),
+        &mut visited,
+        &mut commands,
+        &mut functions,
+    )?;
 
-    Ok(ScanResult { commands, functions })
+    Ok(ScanResult {
+        commands,
+        functions,
+    })
 }
 
 fn scan_module_file(
@@ -531,7 +569,8 @@ fn scan_module_file(
     commands: &mut Vec<CommandSpec>,
     functions: &mut Vec<FunctionSpec>,
 ) -> Result<(), String> {
-    let canonical = fs::canonicalize(file_path).map_err(|err| format!("failed to resolve {}: {err}", file_path.display()))?;
+    let canonical = fs::canonicalize(file_path)
+        .map_err(|err| format!("failed to resolve {}: {err}", file_path.display()))?;
     if !visited.insert(canonical.clone()) {
         return Ok(());
     }
@@ -541,7 +580,14 @@ fn scan_module_file(
     let file = syn::parse_file(&source)
         .map_err(|err| format!("failed to parse {}: {err}", canonical.display()))?;
 
-    scan_items(&file.items, canonical.parent().unwrap_or(module_dir), module_path, visited, commands, functions)
+    scan_items(
+        &file.items,
+        canonical.parent().unwrap_or(module_dir),
+        module_path,
+        visited,
+        commands,
+        functions,
+    )
 }
 
 fn scan_items(
@@ -568,7 +614,14 @@ fn scan_items(
                 }
             }
             Item::Mod(item_mod) => {
-                scan_nested_module(item_mod, current_dir, module_path, visited, commands, functions)?;
+                scan_nested_module(
+                    item_mod,
+                    current_dir,
+                    module_path,
+                    visited,
+                    commands,
+                    functions,
+                )?;
             }
             _ => {}
         }
@@ -592,11 +645,25 @@ fn scan_nested_module(
     module_path.push(item_mod.ident.to_string());
 
     let result = if let Some((_, items)) = &item_mod.content {
-        scan_items(items, current_dir, module_path, visited, commands, functions)
+        scan_items(
+            items,
+            current_dir,
+            module_path,
+            visited,
+            commands,
+            functions,
+        )
     } else {
         let file_path = resolve_module_file(current_dir, &item_mod.ident)?;
         let next_dir = file_path.parent().unwrap_or(current_dir);
-        scan_module_file(&file_path, next_dir, module_path, visited, commands, functions)
+        scan_module_file(
+            &file_path,
+            next_dir,
+            module_path,
+            visited,
+            commands,
+            functions,
+        )
     };
 
     module_path.pop();
@@ -614,7 +681,10 @@ fn resolve_module_file(current_dir: &Path, ident: &Ident) -> Result<PathBuf, Str
         return Ok(nested);
     }
 
-    Err(format!("could not resolve module file for `{ident}` in {}", current_dir.display()))
+    Err(format!(
+        "could not resolve module file for `{ident}` in {}",
+        current_dir.display()
+    ))
 }
 
 fn module_is_enabled(item_mod: &ItemMod) -> bool {
@@ -624,7 +694,10 @@ fn module_is_enabled(item_mod: &ItemMod) -> bool {
         }
 
         let tokens = attr.meta.to_token_stream().to_string();
-        if tokens.contains("test") || tokens.contains("feature") || tokens.contains("debug_assertions") {
+        if tokens.contains("test")
+            || tokens.contains("feature")
+            || tokens.contains("debug_assertions")
+        {
             continue;
         }
     }
@@ -746,8 +819,14 @@ fn has_tauri_command_attr(attrs: &[syn::Attribute]) -> bool {
     attrs.iter().any(|attr| {
         let segments = &attr.path().segments;
         matches!(segments.len(), 2)
-            && segments.first().map(|segment| segment.ident == "tauri").unwrap_or(false)
-            && segments.last().map(|segment| segment.ident == "command").unwrap_or(false)
+            && segments
+                .first()
+                .map(|segment| segment.ident == "tauri")
+                .unwrap_or(false)
+            && segments
+                .last()
+                .map(|segment| segment.ident == "command")
+                .unwrap_or(false)
     })
 }
 
@@ -817,11 +896,7 @@ fn generate_trampoline(func: &ItemFn) -> proc_macro2::TokenStream {
     }
 }
 
-fn generate_arg_extraction(
-    param: &Ident,
-    json_key: &str,
-    ty: &Type,
-) -> proc_macro2::TokenStream {
+fn generate_arg_extraction(param: &Ident, json_key: &str, ty: &Type) -> proc_macro2::TokenStream {
     let key_lit = LitStr::new(json_key, Span::call_site());
 
     if is_string_type(ty) {

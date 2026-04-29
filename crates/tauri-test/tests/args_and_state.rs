@@ -15,7 +15,10 @@ fn reads_required_and_optional_args() {
         tauri_test::args::get_i64(&args, "count").expect("count should exist"),
         3
     );
-    assert_eq!(tauri_test::args::opt_str(&args, "title").as_deref(), Some("Write tests"));
+    assert_eq!(
+        tauri_test::args::opt_str(&args, "title").as_deref(),
+        Some("Write tests")
+    );
     assert_eq!(tauri_test::args::opt_i64(&args, "count"), Some(3));
 }
 
@@ -46,6 +49,12 @@ fn stores_and_reads_registered_state() {
 
 #[test]
 fn converts_optional_string_to_json_value() {
-    assert_eq!(tauri_test::args::opt_str_to_value(Some("hello".into())), json!("hello"));
-    assert_eq!(tauri_test::args::opt_str_to_value(None), serde_json::Value::Null);
+    assert_eq!(
+        tauri_test::args::opt_str_to_value(Some("hello".into())),
+        json!("hello")
+    );
+    assert_eq!(
+        tauri_test::args::opt_str_to_value(None),
+        serde_json::Value::Null
+    );
 }

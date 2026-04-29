@@ -49,7 +49,8 @@ pub fn get<T: Any + Send + Sync + 'static>() -> Result<&'static T, String> {
 }
 
 /// Retrieve a registered value as `tauri::State<T>`.
-pub fn get_tauri_state<T: Any + Send + Sync + 'static>() -> Result<tauri::State<'static, T>, String> {
+pub fn get_tauri_state<T: Any + Send + Sync + 'static>() -> Result<tauri::State<'static, T>, String>
+{
     let value = get::<T>()?;
     Ok(unsafe {
         std::mem::transmute::<StateRepr<T>, tauri::State<'static, T>>(StateRepr(value, PhantomData))
