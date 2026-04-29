@@ -1,5 +1,6 @@
 # TauriTest
-A testing library for tauri, that exposes Tauri commands to JSdom via N-API bridge, allowing full JS-driven integration testing against application UI and Rust source code.
+
+A UI integration testing library for Tauri, that exposes Tauri commands to JSdom via N-API bridge, allowing full JS-driven integration testing against application UI and Rust source code.
 
 ## Getting Started
 
@@ -98,3 +99,12 @@ it("greets through real Rust", async () => {
   });
 });
 ```
+
+## Publishing
+
+This repository publishes two crates:
+
+- `tauri-test-macros` is the implementation crate for the procedural macros.
+- `tauri-test` is the public crate that re-exports those macros and the runtime API.
+
+The publish workflow releases `tauri-test-macros` first, waits for it to appear in the crates.io index, and then publishes `tauri-test`.

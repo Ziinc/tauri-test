@@ -1,10 +1,17 @@
 [package]
 name = "tauri-test"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Test Tauri commands from JavaScript through a generated invoke bridge."
+readme = "../../README.md"
+keywords = ["tauri", "testing", "napi", "integration"]
+categories = ["development-tools::testing"]
 
 [dependencies]
-tauri-test-macros = { path = "../tauri-test-macros" }
+tauri-test-macros = { version = "0.1.0", path = "../tauri-test-macros" }
 serde_json = "1"
 tauri = { version = "2", default-features = false }
 
