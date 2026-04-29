@@ -99,12 +99,3 @@ it("greets through real Rust", async () => {
   });
 });
 ```
-
-## Publishing
-
-This repository publishes two crates:
-
-- `tauri-test-macros` is the implementation crate for the procedural macros.
-- `tauri-test` is the public crate that re-exports those macros and the runtime API.
-
-The publish workflow releases `tauri-test-macros` first, waits for it to appear in the crates.io index, and then publishes `tauri-test`.

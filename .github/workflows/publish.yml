@@ -22,27 +22,5 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Validate package metadata
-        run: |
-          cargo package --locked --dry-run --package tauri-test-macros
-          cargo package --locked --dry-run --package tauri-test
-
-      - name: Publish tauri-test-macros
-        run: cargo publish --locked --package tauri-test-macros
-
-      - name: Wait for tauri-test-macros to appear in crates.io index
-        shell: bash
-        run: |
-          set -euo pipefail
-          version="$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next(pkg["version"] for pkg in data["packages"] if pkg["name"] == "tauri-test-macros"))')"
-          for attempt in {1..30}; do
-            if cargo info tauri-test-macros@"${version}" >/dev/null 2>&1; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "tauri-test-macros ${version} was not visible in the crates.io index in time" >&2
-          exit 1
-
-      - name: Publish tauri-test
-        run: cargo publish --locked --package tauri-test
+      - name: Publish crates
+        run: cargo publish --locked
